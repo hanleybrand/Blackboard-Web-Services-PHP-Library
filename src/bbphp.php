@@ -1,4 +1,4 @@
-<?php
+<?php namespace kreeves;
 /*
  * BbPHP: Blackboard Web Services Library for PHP
  * Copyright (C) 2011 by St. Edward's University (www.stedwards.edu)
@@ -30,10 +30,20 @@ class BbPhp {
 		$this->use_curl = $use_curl;
 		$this->session_id = $this->Context("initialize");
 	}
+
+    public function getSessionId()
+    {
+        return $this->session_id;
+    }
+
+    public function setSessionId($session)
+    {
+        $this->session_id = $session;
+    }
 	
 	private function buildHeader() {
-		$stamp = gmdate("Y-m-d\TH:i:s\Z");
-		
+		$stamp = \gmdate('Y-m-d\TH:i:s\Z', time());
+
 		if ($this->session_id == null) {
 			$password = 'nosession';
 		} else {
@@ -83,8 +93,8 @@ END;
 		if (!isset($args[1])) {
 			$args[1] = null;
 		}
-		
-		if (in_array($method, $this->services)) {
+
+		if (\in_array($method, $this->services)) {
 			return $this->doCall($args[0], $method, $args[1]);
 		} else {
 			return $this->doCall($method, $args[0], $args[1]);
@@ -92,27 +102,32 @@ END;
 	}
 	
 	public function doCall($method = null, $service = "Context", $args = null) {
-		
 		$request = $this->buildRequest($method, $service, $args);
 
 		if ($this->use_curl) {
-			$ch = curl_init();
+			$ch = \curl_init();
 				
-			curl_setopt($ch, CURLOPT_URL, $this->url . '/webapps/ws/services/' . $service . '.WS');
-			curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-type: text/xml; charset=utf-8', 'SOAPAction: "' . $method . '"'));
-			curl_setopt($ch, CURLOPT_POST, 1);
-			curl_setopt($ch, CURLOPT_POSTFIELDS, $request);
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+			\curl_setopt($ch, CURLOPT_URL, $this->url . '/webapps/ws/services/' . $service . '.WS');
+			\curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-type: text/xml; charset=utf-8', 'SOAPAction: "' . $method . '"'));
+			\curl_setopt($ch, CURLOPT_POST, 1);
+			\curl_setopt($ch, CURLOPT_POSTFIELDS, $request);
+			\curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 			
-			$result = curl_exec($ch);
-			curl_close($ch);	
+			$result = \curl_exec($ch);
+
+			\curl_close($ch);
 		} else {
 			$result = $this->doPostRequest($this->url . '/webapps/ws/services/' . $service . '.WS', $request, "Content-type: text/xml; charset=utf-8\nSOAPAction: \"" . $method . "\"");
 		}
-		
-		$result_array = $this->xmlstr_to_array($result);
 
-		$final_result = (isset($result_array['Body'][$method . 'Response']['return'])) ? $result_array['Body'][$method . 'Response']['return'] : null;
+		$result_array = $this->xmlstr_to_array($result);
+        if ($method == "loginTool") {
+            $final_result = (isset($result_array['Body'][$method . 'Response']['return'])) ? $result_array['Body'][$method . 'Response']['return'] : $result_array;
+        } else {
+            $final_result = (isset($result_array['Body'][$method . 'Response']['return'])) ? $result_array['Body'][$method . 'Response']['return'] : null;
+        }
+
+
 		return $final_result;
 	}	
 	
@@ -128,20 +143,20 @@ END;
 		if ($optional_headers !== null) {
 			$params['http']['header'] = $optional_headers;
 		}
-		$ctx = stream_context_create($params);
+		$ctx = \stream_context_create($params);
 		$fp = @fopen($url, 'rb', false, $ctx);
 		if (!$fp) {
-			throw new Exception("Problem with $url, $php_errormsg");
+			throw new \Exception("Problem with $url, $php_errormsg");
 		}
 		$response = @stream_get_contents($fp);
 		if ($response === false) {
-			throw new Exception("Problem reading data from $url, $php_errormsg");
+			throw new \Exception("Problem reading data from $url, $php_errormsg");
 		}
 		return $response;
 	}	
 
 	function xmlstr_to_array($xmlstr) {
-		$doc = new DOMDocument();
+		$doc = new \DOMDocument();
 		$doc->loadXML($xmlstr);
 		return $this->domnode_to_array($doc->documentElement);
 	}
@@ -160,7 +175,7 @@ END;
 					$v = $this->domnode_to_array($child);
 					if(isset($child->tagName)) {
 						$t = $child->tagName;
-						if (strpos($t, ':') !== false) {
+						if (\strpos($t, ':') !== false) {
 							$temp = explode(':', $t);
 							$key = $temp[1];
 						} else {
@@ -176,7 +191,7 @@ END;
 					}
 				}	
 
-				if(is_array($output)) {
+				if(\is_array($output)) {
 					if($node->attributes->length) {
 						$a = array();
 						foreach($node->attributes as $attrName => $attrNode) {
@@ -185,7 +200,7 @@ END;
 						$output['@attributes'] = $a;
 					}
 					foreach ($output as $t => $v) {
-						if(is_array($v) && count($v)==1 && $t!='@attributes') {
+						if(\is_array($v) && \count($v)==1 && $t!='@attributes') {
 							$output[$t] = $v[0];
 						}
 					}
