@@ -4,3 +4,7 @@
 .project
 
 .buildpath
+
+*_local.php
+
+.idea
