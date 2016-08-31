@@ -43,6 +43,7 @@
     //$blackboard = new BbPhp($server, $use_curl = false);
     include "auth_local.php";
     $blackboard = get_bb();
+    $user_name = "administrator"; // change this to a username you know exists
     echo "the initial blackboard object: <br />";
     var_dump($blackboard);
 
@@ -58,7 +59,7 @@
     echo "<pre>".print_r($results, true)."</pre>";
 
     //Calling a method WITH required fields.
-    $results = $blackboard->Context("getMemberships", array("userid"=> "aaronm"));
+    $results = $blackboard->Context("getMemberships", array("userid"=> $user_name));
     echo "getMemberships() method. <br /> Calling a method <strong>with</strong> required fields. This is a part of the Context object.";
     echo "<pre>".print_r($results, true)."</pre>";
     $course_id = $results['externalId'];
