@@ -6,7 +6,7 @@
  * Licensed under The MIT License
  * Redistributions of files must retain the above copyright notice.
  */ 
-include "bbphp.php";
+include "../bbphp.php";
 ?>
 <html>
 <head>
@@ -20,7 +20,7 @@ body {
 pre {
 	background-color: #C8DBDB;
 	margin: 20px 20px 20px 20px;
-	padding: 20px 20px 20xp 20px;
+	padding: 20px 20px 20px 20px;
 }
 </style>
 
@@ -29,17 +29,18 @@ pre {
 </head>
 <body>
 <?php
-//Set the blackboard server your using
-$server = "http://bb9test.stedwards.edu";
-//Init the Blackboard object
-$blackboard = new BbPhp($server);
-//Use the information matching a registered Proxy Tool to login
-$results = $blackboard->Context("loginTool", array("password"=> "MassiveNinjasEpicSlurpees","clientVendorId"=> "aaron_proxy","clientProgramId"=> "example_tool","loginExtraInfo"=> "", "expectedLifeSeconds" => 5000));
+    //Set up by saving auth_template.php as auth_local.php
+    // and editing the information to work with your Bb Learn installation
+    //Init the Blackboard object
+    //$blackboard = new BbPhp($server, $use_curl = false);
+    include "auth_local.php";
+    $blackboard = get_bb();
+    $user_name = "administrator"; // change this to a username you know exists
 
-if($results == TRUE){
+if($blackboard){
 
 	//Calling a method WITH required fields.
-	$results = $blackboard->Context("getMemberships", array("userid"=> "aaronm"));
+	$results = $blackboard->Context("getMemberships", array("userid"=> $user_name));
 
 
 
